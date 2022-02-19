@@ -62,27 +62,16 @@ y = []
 i = 0
 t0 = 0
 t1 = 0
-learning_rate0 = 0.1
-learning_rate1 = 0.00001
+learning_rate0 = 0.01
+learning_rate1 = 0.00000000015
 while (i < 2000):
 	cost = get_cost(t1, t0, data)
 
 	tmp_t0 = get_tmp_t0(learning_rate0, data, t0, t1)
 	tmp_t1 = get_tmp_t1(learning_rate1, data, t0, t1)
-	cost2 = get_cost(tmp_t1, tmp_t0, data)
-	# plt.plot(t1, cost)
 
-	diff_t1 = (cost2 - cost) / (tmp_t1 - t1)
-	diff_t0 = (cost2 - cost) / (tmp_t0 - t0)
-	if (diff_t1 < 0):
-		t1 = t1 + abs(learning_rate1 * tmp_t1)
-	else:
-		t1 = t1 - abs(learning_rate1 * tmp_t1)
-
-	if (diff_t0 < 0):
-		t0 = t0 + abs(learning_rate0 * tmp_t0)
-	else:
-		t0 = t0 - abs(learning_rate0 * tmp_t0)
+	t1 = t1 - tmp_t1
+	t0 = t0 - tmp_t0
 
 
 	# x.append(t1)
