@@ -1,0 +1,113 @@
+import matplotlib.pyplot as plt
+
+def read_data(data_path):
+	fd = open(data_path, 'rt')
+
+	index = fd.readline()
+	index = index[:-1]
+	cols = index.split(',')
+	data = []
+
+	lines = fd.readlines()
+	for line in lines:
+		temp = line[:-1]
+		temp = temp.split(',')
+		data.append({cols[0]: int(temp[0]), cols[1]: int(temp[1])})
+
+	fd.close()
+	return data
+
+def plot_data(data):
+	for dot in data:
+		plt.scatter(dot['km'], dot['price'])
+
+def estimate(t0, t1, x):
+	return t0 + t1 * x
+
+def get_tmp_t0(learning_rate, data, t0, t1):
+	i = 0
+	sum = 0
+	m = len(data)
+	while (i < m):
+		sum = sum + ((estimate(t0, t1, data[i]['km'])) - data[i]['price'])
+		i += 1
+	tmp_t0 = learning_rate * (sum / m)
+	
+	return tmp_t0
+
+def get_tmp_t1(learning_rate, data, t0, t1):
+	i = 0
+	sum = 0
+	m = len(data)
+	while (i < m):
+		sum = sum + ((estimate(t0, t1, data[i]['km']) - data[i]['price']) * data[i]['km'])
+		i += 1
+	tmp_t1 = learning_rate * (sum / m)
+	return tmp_t1
+
+def get_cost(w, b, data):
+	i = 0
+	m = len(data)
+	sum = 0
+	while (i < m):
+		sum = sum + pow((data[i]['price'] - estimate(b, w, data[i]['km'])), 2)
+		i += 1
+	cost = sum / m
+	return cost
+
+data = read_data('./data.csv')
+plot_data(data)
+x = []
+y = []
+i = 0
+t0 = 0
+t1 = 0
+learning_rate0 = 0.1
+learning_rate1 = 0.00001
+while (i < 2000):
+	cost = get_cost(t1, t0, data)
+
+	tmp_t0 = get_tmp_t0(learning_rate0, data, t0, t1)
+	tmp_t1 = get_tmp_t1(learning_rate1, data, t0, t1)
+	cost2 = get_cost(tmp_t1, tmp_t0, data)
+	# plt.plot(t1, cost)
+
+	diff_t1 = (cost2 - cost) / (tmp_t1 - t1)
+	diff_t0 = (cost2 - cost) / (tmp_t0 - t0)
+	if (diff_t1 < 0):
+		t1 = t1 + abs(learning_rate1 * tmp_t1)
+	else:
+		t1 = t1 - abs(learning_rate1 * tmp_t1)
+
+	if (diff_t0 < 0):
+		t0 = t0 + abs(learning_rate0 * tmp_t0)
+	else:
+		t0 = t0 - abs(learning_rate0 * tmp_t0)
+
+
+	# x.append(t1)
+	# y.append(cost)
+	print(f"epoch: {i} w: {t1} b: {t0} cost: {cost}")
+	i += 1
+	# t0 = tmp_t0
+	# t1 = tmp_t1
+	# print(i, ": [", t0, ", ", t1, "]")
+	# i += 1
+
+# 	x = [0,10, 300000]
+# 	y = []
+# 	for val in x:
+# 		y.append(t0 + t1 * val)
+# 	plt.plot(x, y)
+	
+x = [0,10, 300000]
+y = []
+for val in x:
+	y.append(t0 + t1 * val)
+line = plt.plot(x, y)
+plt.setp(line, color='r', linewidth=3.0)
+plt.ylim(0, 10000)
+# print(x)
+# print(y)
+# plt.plot(x, y)
+plt.show()
